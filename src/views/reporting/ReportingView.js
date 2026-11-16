@@ -81,7 +81,7 @@ function ReportingView({ canExport, user }) {
           <section className="reporting-card">
             <div className="reporting-card-heading"><div><h2>Transactions de la période</h2><p>{vm.transactions.length} opération(s) sur cette page</p></div></div>
             <div className="reporting-table-wrap"><table className="reporting-table"><thead><tr><th>Référence</th><th>Date</th><th>Type</th><th>Montant</th><th>Agence</th></tr></thead><tbody>
-              {vm.transactions.length ? vm.transactions.map((row) => <tr key={row.reference_transaction}><td>{row.reference_transaction}</td><td>{formatDate(row.date_transaction)}</td><td>{TRANSACTION_LABELS[row.type_transaction] || row.type_transaction}</td><td>{amount(row.montant, row.devise || 'XOF')}</td><td>{row.agence_id || '—'}</td></tr>) : <tr><td className="reporting-empty" colSpan="5">Aucune transaction pour ces filtres.</td></tr>}
+              {vm.transactions.length ? vm.transactions.map((row) => <tr key={row.reference_transaction}><td>{row.reference_transaction}</td><td>{formatDate(row.date_transaction)}</td><td>{TRANSACTION_LABELS[row.type_transaction] || row.type_transaction}</td><td>{amount(row.montant, row.devise || 'XOF')}</td><td>{row.code_agence || '—'}</td></tr>) : <tr><td className="reporting-empty" colSpan="5">Aucune transaction pour ces filtres.</td></tr>}
             </tbody></table></div>
           </section>
 

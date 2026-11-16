@@ -88,6 +88,10 @@ export function normalizeManagedAccount(value) {
 }
 
 export function normalizeAccountStatement(value) {
+  const pagination = isRecord(value?.operations?.meta)
+    ? value.operations.meta
+    : value?.operations;
+
   if (
     !isRecord(value)
     || !isRecord(value.compte)
@@ -95,7 +99,7 @@ export function normalizeAccountStatement(value) {
     || !isRecord(value.totaux)
     || !isRecord(value.operations)
     || !Array.isArray(value.operations.data)
-    || !isRecord(value.operations.meta)
+    || !isRecord(pagination)
   ) {
     throw new ApiError('Le relevé de compte renvoyé par le serveur est invalide.', 200);
   }
@@ -103,8 +107,6 @@ export function normalizeAccountStatement(value) {
   const account = value.compte;
   const period = value.periode;
   const totals = value.totaux;
-  const pagination = value.operations.meta;
-
   return {
     account: {
       number: requiredString(account.numero_compte, 'numero_compte'),
