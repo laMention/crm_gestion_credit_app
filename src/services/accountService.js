@@ -9,6 +9,7 @@ export async function listAccounts({
   number = '',
   type = '',
   status = '',
+  clientUuid = '',
   page = 1,
   perPage = DEFAULT_PAGE_SIZE,
 } = {}) {
@@ -25,6 +26,9 @@ export async function listAccounts({
   }
   if (status) {
     query.set('statut_compte', status);
+  }
+  if (clientUuid) {
+    query.set('client_uuid', clientUuid);
   }
 
   const response = await apiRequest(`/comptes?${query.toString()}`);

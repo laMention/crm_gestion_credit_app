@@ -5,6 +5,7 @@ import ClientsView from '../clients/ClientsView';
 import AgenciesView from '../agencies/AgenciesView';
 import AccountsView from '../accounts/AccountsView';
 import TransactionsView from '../transactions/TransactionsView';
+import CreditsView from '../credits/CreditsView';
 
 function BrandMark() {
   return (
@@ -36,6 +37,9 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
   const canViewAccounts = permissions.some(
     (permission) => permission.id === 'comptes.consulter_tout',
   );
+  const canViewCredits = permissions.some(
+    (permission) => permission.id === 'credits.consulter_tout',
+  );
   const [activePage, setActivePage] = useState(
     canViewDashboard
       ? 'dashboard'
@@ -45,6 +49,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
           ? 'accounts'
           : canViewTransactions
             ? 'transactions'
+            : canViewCredits
+              ? 'credits'
             : canViewAgencies
               ? 'agencies'
               : 'home',
@@ -60,7 +66,7 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             <small>Crédit &amp; opérations</small>
           </span>
         </div>
-        {(canViewDashboard || canViewClients || canViewAccounts || canViewTransactions) && (
+        {(canViewDashboard || canViewClients || canViewAccounts || canViewTransactions || canViewCredits) && (
           <>
             <p className="crm-sidebar-section">ACTIVITÉ</p>
             {canViewDashboard && (
@@ -105,6 +111,17 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
               >
                 <span aria-hidden="true" className="crm-sidebar-link-icon">⇄</span>
                 Transactions
+              </button>
+            )}
+            {canViewCredits && (
+              <button
+                aria-current={activePage === 'credits' ? 'page' : undefined}
+                className={`crm-sidebar-link${activePage === 'credits' ? ' is-active' : ''}`}
+                onClick={() => setActivePage('credits')}
+                type="button"
+              >
+                <span aria-hidden="true" className="crm-sidebar-link-icon">◆</span>
+                Crédits
               </button>
             )}
           </>
@@ -155,6 +172,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 ? 'Activité · Transactions'
               : activePage === 'accounts'
                 ? 'Activité · Comptes'
+              : activePage === 'credits'
+                ? 'Activité · Crédits'
               : activePage === 'clients'
                 ? 'Activité · Clients'
               : 'Espace collaborateur'}
@@ -184,6 +203,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
           <AccountsView permissions={permissions} />
         ) : activePage === 'transactions' && canViewTransactions ? (
           <TransactionsView permissions={permissions} user={user} />
+        ) : activePage === 'credits' && canViewCredits ? (
+          <CreditsView permissions={permissions} user={user} />
         ) : activePage === 'users' && canViewUsers ? (
           <UsersView permissions={permissions} user={user} />
         ) : activePage === 'agencies' && canViewAgencies ? (
@@ -246,6 +267,15 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 type="button"
               >
                 Ouvrir les transactions
+              </button>
+            )}
+            {canViewCredits && (
+              <button
+                className="users-button users-button-primary"
+                onClick={() => setActivePage('credits')}
+                type="button"
+              >
+                Ouvrir la gestion des crédits
               </button>
             )}
             {canViewAgencies && (
