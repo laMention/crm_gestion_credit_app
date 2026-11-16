@@ -4,7 +4,7 @@ export const TRANSACTION_TYPES = [
   'depot',
   'retrait',
   'virement',
-  'paiement_facture',
+  // 'paiement_facture',
   'deboursement',
   'remboursement',
 ];
