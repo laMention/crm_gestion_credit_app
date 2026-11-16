@@ -8,6 +8,7 @@ import TransactionsView from '../transactions/TransactionsView';
 import CreditsView from '../credits/CreditsView';
 import InstallmentsView from '../installments/InstallmentsView';
 import ReportingView from '../reporting/ReportingView';
+import AuditLogsView from '../audit/AuditLogsView';
 
 function BrandMark() {
   return (
@@ -49,6 +50,9 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
   const canViewInstallments = permissions.some(
     (permission) => permission.id === 'echeances.consulter_tout',
   );
+  const canViewAuditLogs = permissions.some(
+    (permission) => permission.id === 'journaux_audit.consulter_tout',
+  );
   const [activePage, setActivePage] = useState(
     canViewDashboard
       ? 'dashboard'
@@ -64,7 +68,9 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 ? 'installments'
                 : canViewAgencies
                   ? 'agencies'
-                  : 'home',
+                  : canViewAuditLogs
+                    ? 'audit'
+                    : 'home',
   );
 
   return (
@@ -184,6 +190,18 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             Agences
           </button>
         )}
+        {canViewAuditLogs && <p className="crm-sidebar-section">SÉCURITÉ</p>}
+        {canViewAuditLogs && (
+          <button
+            aria-current={activePage === 'audit' ? 'page' : undefined}
+            className={`crm-sidebar-link${activePage === 'audit' ? ' is-active' : ''}`}
+            onClick={() => setActivePage('audit')}
+            type="button"
+          >
+            <span aria-hidden="true" className="crm-sidebar-link-icon">◷</span>
+            Journal d’audit
+          </button>
+        )}
         <div className="crm-sidebar-user">
           <div className="crm-sidebar-user-card">
             <span>Session connectée</span>
@@ -213,6 +231,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 ? 'Activité · Échéances'
               : activePage === 'clients'
                 ? 'Activité · Clients'
+              : activePage === 'audit'
+                ? 'Sécurité · Journal d’audit'
               : 'Espace collaborateur'}
         </span>
         <div className="crm-topbar-account">
@@ -250,6 +270,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
           <UsersView permissions={permissions} user={user} />
         ) : activePage === 'agencies' && canViewAgencies ? (
           <AgenciesView permissions={permissions} />
+        ) : activePage === 'audit' && canViewAuditLogs ? (
+          <AuditLogsView user={user} />
         ) : (
           <section aria-labelledby="session-title" className="crm-home-card">
             <p className="users-eyebrow">Espace collaborateur</p>
