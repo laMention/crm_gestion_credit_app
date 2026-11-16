@@ -43,6 +43,40 @@ export async function getCredit(uuid) {
   return normalizeManagedCredit(response.data);
 }
 
+export async function listCreditRepayments(uuid) {
+  const response = await apiRequest(
+    `/credits/${encodeURIComponent(uuid)}/remboursements`,
+  );
+  if (!Array.isArray(response.data)) {
+    throw new ApiError('L’historique des remboursements du crédit est invalide.', 200);
+  }
+
+  return response.data.map((payment) => {
+    if (
+      !payment
+      || typeof payment.uuid !== 'string'
+      || typeof payment.reference_transaction !== 'string'
+      || typeof payment.montant !== 'string'
+      || !Array.isArray(payment.echeances)
+    ) {
+      throw new ApiError('Une opération de remboursement est invalide.', 200);
+    }
+    return {
+      uuid: payment.uuid,
+      reference: payment.reference_transaction,
+      date: payment.date_transaction,
+      amount: payment.montant,
+      currency: payment.devise,
+      allocations: payment.echeances.map((allocation) => ({
+        installmentNumber: Number(allocation.numero_echeance),
+        amount: String(allocation.montant),
+        principal: String(allocation.capital),
+        interest: String(allocation.interet),
+      })),
+    };
+  });
+}
+
 export async function createCredit(accountUuid, payload) {
   const response = await apiRequest(`/comptes/${encodeURIComponent(accountUuid)}/credits`, {
     method: 'POST',

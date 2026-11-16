@@ -193,6 +193,38 @@ function CreditDetail({ viewModel, permissions, user, onEdit, onDecide, onRepay 
           </table>
         </div>
       </section>
+
+      <section aria-labelledby="credit-repayments-title" className="users-card credit-installments-card">
+        <header className="credit-section-heading">
+          <div>
+            <p className="users-eyebrow">{countFormatter.format(viewModel.repayments.length)} opération(s)</p>
+            <h2 id="credit-repayments-title">Historique des remboursements</h2>
+          </div>
+        </header>
+        <div className="users-table-scroll">
+          <table className="users-table credit-installments-table">
+            <thead><tr><th>Date</th><th>Référence</th><th>Montant versé</th><th>Échéances et répartition</th></tr></thead>
+            <tbody>
+              {viewModel.repayments.map((repayment) => (
+                <tr key={repayment.uuid}>
+                  <td>{formatDate(repayment.date)}</td>
+                  <td><strong>{repayment.reference}</strong></td>
+                  <td>{formatMoney(repayment.amount, repayment.currency)}</td>
+                  <td>{repayment.allocations.map((allocation) => (
+                    <span className="credit-repayment-allocation" key={`${repayment.uuid}-${allocation.installmentNumber}`}>
+                      Éch. {allocation.installmentNumber} · {formatMoney(allocation.amount, repayment.currency)}
+                      {' '}(capital {formatMoney(allocation.principal, repayment.currency)}, intérêts {formatMoney(allocation.interest, repayment.currency)})
+                    </span>
+                  ))}</td>
+                </tr>
+              ))}
+              {viewModel.repayments.length === 0 && (
+                <tr><td className="users-empty" colSpan="4">Aucun remboursement n’a encore été enregistré pour ce crédit.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </section>
   );
 }

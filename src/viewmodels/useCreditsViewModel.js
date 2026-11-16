@@ -29,6 +29,7 @@ export default function useCreditsViewModel() {
   const [selectedCredit, setSelectedCredit] = useState(null);
   const [installments, setInstallments] = useState([]);
   const [installmentTotal, setInstallmentTotal] = useState(0);
+  const [repayments, setRepayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,6 +79,7 @@ export default function useCreditsViewModel() {
       setSelectedCredit(null);
       setInstallments([]);
       setInstallmentTotal(0);
+      setRepayments([]);
       setDetailError('');
       setIsLoadingDetail(false);
       return undefined;
@@ -85,19 +87,22 @@ export default function useCreditsViewModel() {
     let isCurrent = true;
     setSelectedCredit(null);
     setInstallments([]);
+    setRepayments([]);
     setDetailError('');
     setIsLoadingDetail(true);
 
     async function loadDetail() {
       try {
-        const [credit, schedule] = await Promise.all([
+        const [credit, schedule, paymentHistory] = await Promise.all([
           creditService.getCredit(selectedCreditUuid),
           installmentService.listCreditInstallments(selectedCreditUuid),
+          creditService.listCreditRepayments(selectedCreditUuid),
         ]);
         if (isCurrent) {
           setSelectedCredit(credit);
           setInstallments(schedule.installments);
           setInstallmentTotal(schedule.total);
+          setRepayments(paymentHistory);
         }
       } catch (requestError) {
         if (!(requestError instanceof ApiError)) throw requestError;
@@ -233,6 +238,7 @@ export default function useCreditsViewModel() {
     selectedCredit,
     installments,
     installmentTotal,
+    repayments,
     isLoading,
     isLoadingDetail,
     isSaving,
