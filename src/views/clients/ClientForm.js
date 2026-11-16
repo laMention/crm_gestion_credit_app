@@ -12,6 +12,7 @@ function ClientForm({ client, isSaving, error, onClose, onSubmit }) {
     birthPlace: client?.birthPlace || '',
     gender: client?.gender || '',
     profession: client?.profession || '',
+    monthlyIncome: client?.monthlyIncome || '',
   });
 
   const updateValue = (event) => {
@@ -36,6 +37,7 @@ function ClientForm({ client, isSaving, error, onClose, onSubmit }) {
       lieu_naissance: values.birthPlace.trim() || null,
       sexe: values.gender.trim() || null,
       profession: values.profession.trim() || null,
+      revenu_mensuel: values.monthlyIncome === '' ? null : Number(values.monthlyIncome),
     };
 
     const saved = await onSubmit({ uuid: client?.uuid, payload });
@@ -180,6 +182,17 @@ function ClientForm({ client, isSaving, error, onClose, onSubmit }) {
                 name="profession"
                 onChange={updateValue}
                 value={values.profession}
+              />
+            </label>
+            <label>
+              <span>Revenu mensuel (XOF)</span>
+              <input
+                min="0"
+                name="monthlyIncome"
+                onChange={updateValue}
+                step="0.01"
+                type="number"
+                value={values.monthlyIncome}
               />
             </label>
           </div>

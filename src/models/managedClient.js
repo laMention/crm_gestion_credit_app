@@ -24,6 +24,11 @@ export function normalizeManagedClient(value) {
     || typeof value.ville_client !== 'string'
     || typeof value.email_client !== 'string'
     || typeof value.statut !== 'string'
+    || (
+      value.revenu_mensuel !== null
+      && value.revenu_mensuel !== undefined
+      && !Number.isFinite(Number(value.revenu_mensuel))
+    )
     || !Number.isInteger(value.comptes_count)
     || value.comptes_count < 0
   ) {
@@ -56,6 +61,9 @@ export function normalizeManagedClient(value) {
     birthPlace: optionalString(value.lieu_naissance, 'lieu_naissance'),
     gender: optionalString(value.sexe, 'sexe'),
     profession: optionalString(value.profession, 'profession'),
+    monthlyIncome: value.revenu_mensuel === null || value.revenu_mensuel === undefined
+      ? ''
+      : String(value.revenu_mensuel),
     status: value.statut,
     accountCount: value.comptes_count,
     createdAt: optionalString(value.cree_le, 'cree_le'),

@@ -10,6 +10,11 @@ const CLIENT_STATUS_LABELS = {
 };
 
 const countFormatter = new Intl.NumberFormat('fr-FR');
+const incomeFormatter = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'XOF',
+  maximumFractionDigits: 0,
+});
 
 function initials(client) {
   return `${client.firstName.charAt(0)}${client.lastName.charAt(0)}`.toLocaleUpperCase('fr-FR');
@@ -77,6 +82,7 @@ function ClientDetail({ client, canEdit, onBack, onEdit }) {
           <div><dt>Lieu de naissance</dt><dd>{client.birthPlace || 'Non renseigné'}</dd></div>
           <div><dt>Sexe</dt><dd>{client.gender || 'Non renseigné'}</dd></div>
           <div><dt>Profession</dt><dd>{client.profession || 'Non renseignée'}</dd></div>
+          <div><dt>Revenu mensuel</dt><dd>{client.monthlyIncome ? incomeFormatter.format(Number(client.monthlyIncome)) : 'Non renseigné'}</dd></div>
           <div><dt>Agence</dt><dd>{client.agency?.name || 'Non renseignée'}</dd></div>
           <div><dt>Comptes associés</dt><dd>{countFormatter.format(client.accountCount)}</dd></div>
         </dl>
