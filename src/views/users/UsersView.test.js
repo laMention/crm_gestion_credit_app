@@ -13,11 +13,25 @@ const user = {
   actif: true,
   derniere_connexion_le: '2026-11-15T08:30:00Z',
   agence: {
+    id: 12,
     uuid: 'agency-123',
     code: 'AG-TEST',
     nom: 'Agence de test',
     ville: 'Abidjan',
+    actif: true,
   },
+};
+
+const agency = {
+  id: 12,
+  uuid: 'agency-123',
+  code_agence: 'AG-TEST',
+  nom_agence: 'Agence de test',
+  adresse_agence: '12 rue du Plateau',
+  ville_agence: 'Abidjan',
+  telephone_agence: '0700000000',
+  email_agence: 'agence@example.test',
+  actif: true,
 };
 
 const admin = {
@@ -94,6 +108,18 @@ function renderUsersView() {
 
 beforeEach(() => {
   global.fetch = jest.fn((url) => {
+    if (url.includes('/agences?')) {
+      return jsonResponse({
+        data: [agency],
+        meta: {
+          current_page: 1,
+          last_page: 1,
+          total: 1,
+          per_page: 100,
+        },
+      });
+    }
+
     if (url.endsWith('/roles')) {
       return jsonResponse({ data: roles });
     }
@@ -189,10 +215,9 @@ test('creates an agency user with the backend fields and role catalogue', async 
     target: { value: 'conseiller' },
   });
   expect(await screen.findByText('Gère les dossiers de son agence.')).toBeInTheDocument();
-  fireEvent.change(
-    screen.getByLabelText('Identifiant de l’agence (obligatoire)'),
-    { target: { value: '12' } },
-  );
+  fireEvent.change(screen.getByLabelText('Agence de rattachement (obligatoire)'), {
+    target: { value: '12' },
+  });
   fireEvent.change(screen.getByLabelText('Mot de passe'), {
     target: { value: 'mot-de-passe-valide' },
   });
@@ -225,7 +250,7 @@ test('creates an agency user with the backend fields and role catalogue', async 
   expect(await screen.findByRole('status')).toHaveTextContent('L’utilisateur a été créé.');
 });
 
-test('updates a user without inventing role or agency fields', async () => {
+test('updates a user while preserving the agency assignment returned by the API', async () => {
   renderUsersView();
 
   expect(await screen.findByText('Aminata Kouassi')).toBeInTheDocument();
@@ -247,6 +272,7 @@ test('updates a user without inventing role or agency fields', async () => {
           telephone: '0709999999',
           adresse: 'Centre-ville',
           ville: 'Abidjan',
+          agence_id: 12,
         }),
       }),
     );

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import UsersView from '../users/UsersView';
 import DashboardView from '../dashboard/DashboardView';
 import ClientsView from '../clients/ClientsView';
+import AgenciesView from '../agencies/AgenciesView';
 
 function BrandMark() {
   return (
@@ -24,15 +25,20 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
   const canViewClients = permissions.some(
     (permission) => permission.id === 'clients.consulter_tout',
   );
+  const canViewAgencies = permissions.some(
+    (permission) => permission.id === 'agences.consulter_tout',
+  );
+  const canViewUsers = permissions.some(
+    (permission) => permission.id === 'utilisateurs.consulter_tout',
+  );
   const [activePage, setActivePage] = useState(
     canViewDashboard
       ? 'dashboard'
       : canViewClients
         ? 'clients'
-        : 'home',
-  );
-  const canViewUsers = permissions.some(
-    (permission) => permission.id === 'utilisateurs.consulter_tout',
+        : canViewAgencies
+          ? 'agencies'
+          : 'home',
   );
 
   return (
@@ -72,7 +78,9 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             )}
           </>
         )}
-        {canViewUsers && <p className="crm-sidebar-section">ADMINISTRATION</p>}
+        {(canViewUsers || canViewAgencies) && (
+          <p className="crm-sidebar-section">ADMINISTRATION</p>
+        )}
         {canViewUsers && (
           <button
             aria-current={activePage === 'users' ? 'page' : undefined}
@@ -82,6 +90,17 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
           >
             <span aria-hidden="true" className="crm-sidebar-link-icon">♙</span>
             Gestion des utilisateurs
+          </button>
+        )}
+        {canViewAgencies && (
+          <button
+            aria-current={activePage === 'agencies' ? 'page' : undefined}
+            className={`crm-sidebar-link${activePage === 'agencies' ? ' is-active' : ''}`}
+            onClick={() => setActivePage('agencies')}
+            type="button"
+          >
+            <span aria-hidden="true" className="crm-sidebar-link-icon">⌂</span>
+            Agences
           </button>
         )}
         <div className="crm-sidebar-user">
@@ -97,6 +116,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
         <span className="crm-topbar-label">
           {activePage === 'users'
             ? 'Administration · Utilisateurs'
+            : activePage === 'agencies'
+              ? 'Administration · Agences'
             : activePage === 'dashboard'
               ? 'Activité · Tableau de bord'
               : activePage === 'clients'
@@ -126,6 +147,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
           <ClientsView user={user} permissions={permissions} />
         ) : activePage === 'users' && canViewUsers ? (
           <UsersView permissions={permissions} user={user} />
+        ) : activePage === 'agencies' && canViewAgencies ? (
+          <AgenciesView permissions={permissions} />
         ) : (
           <section aria-labelledby="session-title" className="crm-home-card">
             <p className="users-eyebrow">Espace collaborateur</p>
@@ -166,6 +189,15 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 type="button"
               >
                 Ouvrir la gestion des clients
+              </button>
+            )}
+            {canViewAgencies && (
+              <button
+                className="users-button users-button-primary"
+                onClick={() => setActivePage('agencies')}
+                type="button"
+              >
+                Ouvrir la gestion des agences
               </button>
             )}
             {error && <p className="auth-error crm-home-error" role="alert">{error}</p>}

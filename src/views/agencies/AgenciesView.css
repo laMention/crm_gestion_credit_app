@@ -1,0 +1,49 @@
+.agencies-filters {
+  flex-wrap: wrap;
+}
+
+.agencies-table {
+  min-width: 860px;
+}
+
+.agencies-table td strong,
+.agencies-table td small {
+  display: block;
+}
+
+.agencies-table td small.agencies-address {
+  max-width: 260px;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agencies-table code {
+  color: #48566e;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.agency-active-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.agency-active-toggle input {
+  accent-color: var(--color-brand);
+}
+
+@media (max-width: 760px) {
+  .agencies-filters {
+    align-items: stretch;
+  }
+
+  .agencies-filters .users-filter-select select,
+  .agencies-filters > button {
+    width: 100%;
+  }
+}

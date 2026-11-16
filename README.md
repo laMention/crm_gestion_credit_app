@@ -28,10 +28,25 @@ Le module consomme les routes `GET/POST /users`, `PATCH /users/{uuid}`,
 `GET /users/{uuid}/permissions` et `GET /roles`. La recherche utilise les
 paramètres backend `recherche`, `role`, `actif`, `page` et `per_page`.
 
-L’API actuelle ne fournit ni route de suppression d’utilisateur, ni route pour
-lister les agences. En conséquence, aucune suppression n’est proposée et le
-formulaire de création d’un rôle rattaché à une agence demande l’`agence_id`
-numérique existant, sans inventer de sélecteur ou d’endpoint.
+Le formulaire propose les agences actives reçues de `GET /agences`, au lieu de
+demander un identifiant numérique saisi manuellement. Les utilisateurs déjà
+rattachés à une agence conservent leur rattachement lorsque celle-ci est
+désactivée. L’API ne fournit pas de route de suppression d’utilisateur.
+
+## Gestion des agences
+
+Le module consomme `GET /agences`, `POST /agences`, `GET /agences/{uuid}` et
+`PATCH /agences/{uuid}`. La liste accepte `recherche`, `actif`, `page` et
+`per_page`; elle est limitée au périmètre de l’utilisateur. La création et la
+modification sont réservées aux permissions `agences.creer` et
+`agences.modifier`. Les écritures sont enregistrées dans le journal d’audit.
+
+Une agence inactive n’est plus proposée pour une nouvelle affectation
+d’utilisateur, sans bloquer les utilisateurs déjà rattachés. Les agences ne
+sont pas supprimées physiquement, car elles peuvent être référencées par des
+clients, des comptes et des opérations. Le backend ne fournit pas d’écran
+maquette dédié aux agences; l’interface suit donc les composants et styles
+existants du CRM.
 
 ## Tableau de bord
 

@@ -2,7 +2,16 @@ import { useState } from 'react';
 
 const AGENCY_ROLES = new Set(['chef_agence', 'conseiller', 'caissier']);
 
-function UserForm({ user, roles, isSaving, error, onClose, onSubmit }) {
+function UserForm({
+  user,
+  roles,
+  agencies,
+  isLoadingAgencies,
+  isSaving,
+  error,
+  onClose,
+  onSubmit,
+}) {
   const [values, setValues] = useState({
     nom: user?.nom || '',
     prenom: user?.prenom || '',
@@ -11,7 +20,7 @@ function UserForm({ user, roles, isSaving, error, onClose, onSubmit }) {
     adresse: user?.adresse || '',
     ville: user?.ville || '',
     role: user?.role || roles[0]?.identifiant || '',
-    agenceId: '',
+    agenceId: user?.agence ? String(user.agence.id) : '',
     password: '',
     passwordConfirmation: '',
   });
@@ -20,6 +29,10 @@ function UserForm({ user, roles, isSaving, error, onClose, onSubmit }) {
   const roleRequiresAgency = AGENCY_ROLES.has(values.role);
   const roleChanged = Boolean(user && values.role !== user.role);
   const agencyIdRequired = roleRequiresAgency && (!user || roleChanged);
+  const availableAgencies = user?.agence
+    && !agencies.some((agency) => agency.id === user.agence.id)
+    ? [{ ...user.agence, name: user.agence.nom, active: user.agence.active }, ...agencies]
+    : agencies;
 
   const updateValue = (event) => {
     const { name, value } = event.target;
@@ -35,12 +48,15 @@ function UserForm({ user, roles, isSaving, error, onClose, onSubmit }) {
     setFormError('');
 
     if (agencyIdRequired && !values.agenceId.trim()) {
-      setFormError('Renseignez l’identifiant numérique de l’agence pour ce rôle.');
+      setFormError('Sélectionnez une agence active pour ce rôle.');
       return;
     }
 
-    if (values.agenceId && !/^[1-9]\d*$/.test(values.agenceId)) {
-      setFormError('L’identifiant de l’agence doit être un entier positif.');
+    if (
+      values.agenceId
+      && !availableAgencies.some((agency) => String(agency.id) === values.agenceId)
+    ) {
+      setFormError('Sélectionnez une agence disponible dans la liste.');
       return;
     }
 
@@ -149,17 +165,25 @@ function UserForm({ user, roles, isSaving, error, onClose, onSubmit }) {
             {roleRequiresAgency && (
               <label className="users-form-wide">
                 <span>
-                  Identifiant de l’agence{agencyIdRequired ? ' (obligatoire)' : ' (facultatif)'}
+                  Agence de rattachement{agencyIdRequired ? ' (obligatoire)' : ' (facultative)'}
                 </span>
-                <input
-                  inputMode="numeric"
-                  min="1"
+                <select
+                  disabled={isLoadingAgencies}
                   name="agenceId"
                   onChange={updateValue}
-                  placeholder="ID numérique fourni par le système"
-                  type="number"
+                  required={agencyIdRequired}
                   value={values.agenceId}
-                />
+                >
+                  <option value="">
+                    {isLoadingAgencies ? 'Chargement des agences…' : 'Choisir une agence'}
+                  </option>
+                  {availableAgencies.map((agency) => (
+                    <option key={agency.id} value={agency.id}>
+                      {agency.name || agency.nom} · {agency.code}
+                      {!agency.active ? ' (rattachement actuel inactif)' : ''}
+                    </option>
+                  ))}
+                </select>
               </label>
             )}
             <label className="users-form-wide">
@@ -192,9 +216,8 @@ function UserForm({ user, roles, isSaving, error, onClose, onSubmit }) {
 
           {roleRequiresAgency && (
             <p className="users-form-hint">
-              L’API de gestion des agences n’est pas encore disponible. Le backend
-              attend un <code>agence_id</code> numérique; vérifiez cet ID avant
-              l’enregistrement.
+              Seules les agences actives sont proposées pour une nouvelle affectation.
+              Les utilisateurs déjà rattachés conservent leur accès si une agence est désactivée.
             </p>
           )}
 

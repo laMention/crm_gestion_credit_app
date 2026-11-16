@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import ApiError from '../core/api/ApiError';
+import * as agencyService from '../services/agencyService';
 import * as userService from '../services/userService';
 
 const INITIAL_FILTERS = {
@@ -11,6 +12,7 @@ const INITIAL_FILTERS = {
 export default function useUsersViewModel() {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [agencies, setAgencies] = useState([]);
   const [meta, setMeta] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -22,8 +24,10 @@ export default function useUsersViewModel() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+  const [isLoadingAgencies, setIsLoadingAgencies] = useState(true);
   const [usersError, setUsersError] = useState('');
   const [rolesError, setRolesError] = useState('');
+  const [agenciesError, setAgenciesError] = useState('');
   const [actionError, setActionError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -64,9 +68,32 @@ export default function useUsersViewModel() {
     }
   }, []);
 
+  const loadAgencies = useCallback(async () => {
+    setIsLoadingAgencies(true);
+
+    try {
+      const result = await agencyService.listAgencies({
+        status: '1',
+        page: 1,
+        perPage: 100,
+      });
+      setAgencies(result.agencies);
+      setAgenciesError('');
+    } catch (requestError) {
+      if (!(requestError instanceof ApiError)) {
+        throw requestError;
+      }
+
+      setAgenciesError(requestError.message);
+    } finally {
+      setIsLoadingAgencies(false);
+    }
+  }, []);
+
   const retry = () => {
     void loadUsers();
     void loadRoles();
+    void loadAgencies();
   };
 
   useEffect(() => {
@@ -76,6 +103,10 @@ export default function useUsersViewModel() {
   useEffect(() => {
     void loadRoles();
   }, [loadRoles]);
+
+  useEffect(() => {
+    void loadAgencies();
+  }, [loadAgencies]);
 
   const applyFilters = (nextFilters) => {
     setFilters(nextFilters);
@@ -137,17 +168,19 @@ export default function useUsersViewModel() {
     return userService.getUserPermissions(targetUser.uuid);
   };
 
-  const error = usersError || rolesError || actionError;
+  const error = usersError || rolesError || agenciesError || actionError;
 
   return {
     users,
     roles,
+    agencies,
     meta,
     filters,
     page,
     isLoading,
     isSaving,
     isLoadingRoles,
+    isLoadingAgencies,
     error,
     actionError,
     notice,

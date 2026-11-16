@@ -369,6 +369,8 @@ function UsersView({ user, permissions }) {
         <UserForm
           key={formUser?.uuid || 'new-user'}
           error={viewModel.actionError}
+          agencies={viewModel.agencies}
+          isLoadingAgencies={viewModel.isLoadingAgencies}
           isSaving={viewModel.isSaving}
           onClose={closeForm}
           onSubmit={viewModel.saveUser}

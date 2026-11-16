@@ -52,6 +52,15 @@ const clientListPermission = {
   module_libelle: 'Clients',
 };
 
+const agencyListPermission = {
+  id: 'agences.consulter_tout',
+  identifiant: 'consulterTout',
+  libelle: 'Consulter les agences de son périmètre',
+  description: 'Consulter les agences autorisées.',
+  module: 'agences',
+  module_libelle: 'Agences',
+};
+
 function dashboardIndicatorsResponse() {
   return jsonResponse({
     data: {
@@ -350,6 +359,64 @@ test('opens the client list for authorized agency users', async () => {
   expect(await screen.findByText('CLI-AG-001')).toBeInTheDocument();
   expect(global.fetch).toHaveBeenLastCalledWith(
     'http://localhost:8000/api/v1/clients?per_page=10&page=1',
+    expect.any(Object),
+  );
+});
+
+test('opens the agency list for users with agency consultation permission', async () => {
+  global.fetch
+    .mockReturnValueOnce(
+      jsonResponse({
+        message: 'Connexion réussie.',
+        data: {
+          token: 'agency-token',
+          token_type: 'Bearer',
+          user: authenticatedUser,
+        },
+      }),
+    )
+    .mockReturnValueOnce(
+      currentPermissionsResponse('conseiller', [agencyListPermission]),
+    )
+    .mockReturnValueOnce(jsonResponse({
+      data: [
+        {
+          id: 12,
+          uuid: 'agency-123',
+          code_agence: 'AG-TEST',
+          nom_agence: 'Agence de test',
+          adresse_agence: '12 rue du Plateau',
+          ville_agence: 'Abidjan',
+          telephone_agence: '0700000000',
+          email_agence: 'agence@example.test',
+          actif: true,
+        },
+      ],
+      meta: {
+        current_page: 1,
+        last_page: 1,
+        total: 1,
+        per_page: 10,
+      },
+    }));
+
+  render(<App />);
+  fireEvent.change(screen.getByLabelText('Identifiant professionnel'), {
+    target: { value: 'aminata@example.test' },
+  });
+  fireEvent.change(screen.getByLabelText('Mot de passe'), {
+    target: { value: 'correct-password' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
+
+  expect(await screen.findByRole('heading', { name: 'Gestion des agences' })).toBeInTheDocument();
+  expect(await screen.findByText('AG-TEST')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Agences' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  expect(global.fetch).toHaveBeenLastCalledWith(
+    'http://localhost:8000/api/v1/agences?per_page=10&page=1',
     expect.any(Object),
   );
 });

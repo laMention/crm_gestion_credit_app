@@ -24,9 +24,11 @@ export function normalizeManagedUser(value) {
   if (
     value.agence
     && (
-      typeof value.agence.uuid !== 'string'
+      !Number.isInteger(value.agence.id)
+      || typeof value.agence.uuid !== 'string'
       || typeof value.agence.code !== 'string'
       || typeof value.agence.nom !== 'string'
+      || typeof value.agence.actif !== 'boolean'
     )
   ) {
     throw new ApiError('Le serveur a renvoyé une agence invalide.', 200);
@@ -45,10 +47,12 @@ export function normalizeManagedUser(value) {
     derniereConnexion: value.derniere_connexion_le || null,
     agence: value.agence
       ? {
+        id: value.agence.id,
         uuid: value.agence.uuid,
         code: value.agence.code,
         nom: value.agence.nom,
         ville: value.agence.ville || null,
+        active: value.agence.actif,
       }
       : null,
   };
