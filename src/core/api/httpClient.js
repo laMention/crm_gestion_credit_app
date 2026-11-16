@@ -1,5 +1,6 @@
 import ApiError from './ApiError';
 import { API_BASE_URL } from '../config/apiConfig';
+import { getAuthToken } from '../utils/authStorage';
 
 function validationMessage(errors) {
   if (!errors || typeof errors !== 'object') {
@@ -22,8 +23,9 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  const authToken = token || getAuthToken();
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
   }
 
   let response;
