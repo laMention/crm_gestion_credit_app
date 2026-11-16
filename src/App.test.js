@@ -43,6 +43,15 @@ const dashboardPermission = {
   module_libelle: 'Reportings',
 };
 
+const clientListPermission = {
+  id: 'clients.consulter_tout',
+  identifiant: 'consulterTout',
+  libelle: 'Consulter les clients',
+  description: 'Consulter les clients de son périmètre.',
+  module: 'clients',
+  module_libelle: 'Clients',
+};
+
 function dashboardIndicatorsResponse() {
   return jsonResponse({
     data: {
@@ -272,6 +281,76 @@ test('opens the dashboard for authorized users and requests real reporting indic
   expect(global.fetch).toHaveBeenLastCalledWith(
     expect.stringMatching(/\/reportings\/indicateurs\?date_debut=\d{4}-\d{2}-01&date_fin=\d{4}-\d{2}-\d{2}$/),
     expect.objectContaining({ method: 'GET' }),
+  );
+});
+
+test('opens the client list for authorized agency users', async () => {
+  global.fetch
+    .mockReturnValueOnce(
+      jsonResponse({
+        message: 'Connexion réussie.',
+        data: {
+          token: 'client-token',
+          token_type: 'Bearer',
+          user: authenticatedUser,
+        },
+      }),
+    )
+    .mockReturnValueOnce(
+      currentPermissionsResponse('conseiller', [clientListPermission]),
+    )
+    .mockReturnValueOnce(jsonResponse({
+      data: [
+        {
+          uuid: 'client-123',
+          code_client: 'CLI-AG-001',
+          nom_client: 'Kouassi',
+          prenom_client: 'Aminata',
+          adresse_client: 'Centre-ville',
+          telephone_client: '0701000000',
+          ville_client: 'Abidjan',
+          email_client: 'aminata.client@example.test',
+          date_naissance: '1990-04-12',
+          lieu_naissance: 'Abidjan',
+          sexe: 'F',
+          profession: 'Commerçante',
+          statut: 'actif',
+          agence: {
+            uuid: 'agency-123',
+            code: 'AG-TEST',
+            nom: 'Agence de test',
+          },
+          comptes_count: 2,
+          cree_le: '2026-11-01T10:00:00Z',
+          modifie_le: '2026-11-02T10:00:00Z',
+        },
+      ],
+      meta: {
+        current_page: 1,
+        last_page: 1,
+        total: 1,
+        per_page: 10,
+      },
+    }));
+
+  render(<App />);
+  fireEvent.change(screen.getByLabelText('Identifiant professionnel'), {
+    target: { value: 'aminata@example.test' },
+  });
+  fireEvent.change(screen.getByLabelText('Mot de passe'), {
+    target: { value: 'correct-password' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
+
+  expect(await screen.findByRole('heading', { name: 'Clients' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Clients' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  expect(await screen.findByText('CLI-AG-001')).toBeInTheDocument();
+  expect(global.fetch).toHaveBeenLastCalledWith(
+    'http://localhost:8000/api/v1/clients?per_page=10&page=1',
+    expect.any(Object),
   );
 });
 

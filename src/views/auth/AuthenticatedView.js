@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import UsersView from '../users/UsersView';
 import DashboardView from '../dashboard/DashboardView';
+import ClientsView from '../clients/ClientsView';
 
 function BrandMark() {
   return (
@@ -20,8 +21,15 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
   const canViewTransactions = permissions.some(
     (permission) => permission.id === 'transactions.consulter_tout',
   );
+  const canViewClients = permissions.some(
+    (permission) => permission.id === 'clients.consulter_tout',
+  );
   const [activePage, setActivePage] = useState(
-    canViewDashboard ? 'dashboard' : 'home',
+    canViewDashboard
+      ? 'dashboard'
+      : canViewClients
+        ? 'clients'
+        : 'home',
   );
   const canViewUsers = permissions.some(
     (permission) => permission.id === 'utilisateurs.consulter_tout',
@@ -37,18 +45,31 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             <small>Crédit &amp; opérations</small>
           </span>
         </div>
-        {canViewDashboard && (
+        {(canViewDashboard || canViewClients) && (
           <>
             <p className="crm-sidebar-section">ACTIVITÉ</p>
-            <button
-              aria-current={activePage === 'dashboard' ? 'page' : undefined}
-              className={`crm-sidebar-link${activePage === 'dashboard' ? ' is-active' : ''}`}
-              onClick={() => setActivePage('dashboard')}
-              type="button"
-            >
-              <span aria-hidden="true" className="crm-sidebar-link-icon">▦</span>
-              Tableau de bord
-            </button>
+            {canViewDashboard && (
+              <button
+                aria-current={activePage === 'dashboard' ? 'page' : undefined}
+                className={`crm-sidebar-link${activePage === 'dashboard' ? ' is-active' : ''}`}
+                onClick={() => setActivePage('dashboard')}
+                type="button"
+              >
+                <span aria-hidden="true" className="crm-sidebar-link-icon">▦</span>
+                Tableau de bord
+              </button>
+            )}
+            {canViewClients && (
+              <button
+                aria-current={activePage === 'clients' ? 'page' : undefined}
+                className={`crm-sidebar-link${activePage === 'clients' ? ' is-active' : ''}`}
+                onClick={() => setActivePage('clients')}
+                type="button"
+              >
+                <span aria-hidden="true" className="crm-sidebar-link-icon">♙</span>
+                Clients
+              </button>
+            )}
           </>
         )}
         {canViewUsers && <p className="crm-sidebar-section">ADMINISTRATION</p>}
@@ -78,6 +99,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             ? 'Administration · Utilisateurs'
             : activePage === 'dashboard'
               ? 'Activité · Tableau de bord'
+              : activePage === 'clients'
+                ? 'Activité · Clients'
               : 'Espace collaborateur'}
         </span>
         <div className="crm-topbar-account">
@@ -99,6 +122,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
       <main className="crm-main">
         {activePage === 'dashboard' && canViewDashboard ? (
           <DashboardView canViewTransactions={canViewTransactions} />
+        ) : activePage === 'clients' && canViewClients ? (
+          <ClientsView user={user} permissions={permissions} />
         ) : activePage === 'users' && canViewUsers ? (
           <UsersView permissions={permissions} user={user} />
         ) : (
@@ -132,6 +157,15 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 type="button"
               >
                 Ouvrir le tableau de bord
+              </button>
+            )}
+            {canViewClients && (
+              <button
+                className="users-button users-button-primary"
+                onClick={() => setActivePage('clients')}
+                type="button"
+              >
+                Ouvrir la gestion des clients
               </button>
             )}
             {error && <p className="auth-error crm-home-error" role="alert">{error}</p>}

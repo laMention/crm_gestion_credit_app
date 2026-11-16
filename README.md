@@ -44,6 +44,20 @@ avec `transactions.consulter_tout`. Les données non disponibles par API, comme
 une série historique mensuelle ou les détails nominatifs des dossiers en attente,
 ne sont pas simulées.
 
+## Gestion des clients
+
+La liste utilise `GET /clients` avec `recherche`, `statut`, `page` et
+`per_page`. La fiche client utilise `GET /clients/{uuid}`; la création et la
+modification utilisent respectivement `POST /clients` et `PATCH /clients/{uuid}`.
+Les actions sont présentées selon les permissions `clients.consulter_tout`,
+`clients.consulter`, `clients.creer` et `clients.modifier`, tandis que Laravel
+applique aussi ses contrôles d’accès et le périmètre d’agence.
+
+L’API ne fournit pas de suppression ni de routes de blocage/déblocage des clients.
+Les pièces d’identité et les revenus ne sont pas inclus dans la ressource client;
+ils ne sont donc pas exposés par l’interface. La gestion des comptes associés
+reste réservée au module Comptes.
+
 ## Available Scripts
 
 In the project directory, you can run:
