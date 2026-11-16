@@ -16,6 +16,34 @@ REACT_APP_API_URL=http://localhost:8000/api/v1
 Le formulaire d’authentification utilise les routes Laravel
 `POST /auth/login`, `GET /auth/profile` et `POST /auth/logout`.
 
+## Gestion des utilisateurs
+
+L’accès à la liste est affiché uniquement lorsque la session dispose de la
+permission `utilisateurs.consulter_tout`. Les actions de création, modification,
+d’activation et de désactivation sont conditionnées aux permissions renvoyées par
+`GET /auth/permissions`; Laravel reste responsable de l’autorisation effective.
+
+Le module consomme les routes `GET/POST /users`, `PATCH /users/{uuid}`,
+`PATCH /users/{uuid}/activer`, `PATCH /users/{uuid}/desactiver`,
+`GET /users/{uuid}/permissions` et `GET /roles`. La recherche utilise les
+paramètres backend `recherche`, `role`, `actif`, `page` et `per_page`.
+
+L’API actuelle ne fournit ni route de suppression d’utilisateur, ni route pour
+lister les agences. En conséquence, aucune suppression n’est proposée et le
+formulaire de création d’un rôle rattaché à une agence demande l’`agence_id`
+numérique existant, sans inventer de sélecteur ou d’endpoint.
+
+## Tableau de bord
+
+Le tableau de bord est affiché aux sessions disposant de la permission
+`reportings.consulter_tout`. Les indicateurs utilisent
+`GET /reportings/indicateurs` avec les paramètres de période `date_debut` et
+`date_fin`; ils affichent les totaux et agrégats réellement fournis par Laravel.
+La liste des six dernières opérations appelle `GET /transactions` uniquement
+avec `transactions.consulter_tout`. Les données non disponibles par API, comme
+une série historique mensuelle ou les détails nominatifs des dossiers en attente,
+ne sont pas simulées.
+
 ## Available Scripts
 
 In the project directory, you can run:

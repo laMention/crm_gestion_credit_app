@@ -45,6 +45,27 @@ export async function getProfile() {
   return user;
 }
 
+export async function getCurrentPermissions() {
+  const token = getAuthToken();
+  if (!token) {
+    throw new ApiError('Aucun jeton de session n’est disponible.', 401);
+  }
+
+  const response = await apiRequest('/auth/permissions', { token });
+  const permissions = response.data?.permissions;
+
+  if (
+    !Array.isArray(permissions)
+    || permissions.some(
+      (permission) => !permission || typeof permission.id !== 'string',
+    )
+  ) {
+    throw new ApiError('Les permissions de la session sont invalides.', 200);
+  }
+
+  return permissions;
+}
+
 export async function logout() {
   const token = getAuthToken();
   if (!token) {

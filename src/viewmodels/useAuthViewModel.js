@@ -5,6 +5,7 @@ import * as authService from '../services/authService';
 
 export default function useAuthViewModel() {
   const [user, setUser] = useState(null);
+  const [permissions, setPermissions] = useState([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -17,13 +18,18 @@ export default function useAuthViewModel() {
 
     if (!hasAuthToken()) {
       setUser(null);
+      setPermissions([]);
       setIsInitializing(false);
       return;
     }
 
     try {
-      const profile = await authService.getProfile();
+      const [profile, currentPermissions] = await Promise.all([
+        authService.getProfile(),
+        authService.getCurrentPermissions(),
+      ]);
       setUser(profile);
+      setPermissions(currentPermissions);
     } catch (requestError) {
       if (!(requestError instanceof ApiError)) {
         throw requestError;
@@ -32,6 +38,7 @@ export default function useAuthViewModel() {
       if (requestError.status === 401) {
         authService.clearSession();
         setUser(null);
+        setPermissions([]);
       } else {
         setInitializationError(requestError.message);
       }
@@ -64,9 +71,15 @@ export default function useAuthViewModel() {
 
     try {
       const authenticatedUser = await authService.login(credentials, remember);
+      const currentPermissions = await authService.getCurrentPermissions();
       setUser(authenticatedUser);
+      setPermissions(currentPermissions);
       return true;
     } catch (requestError) {
+      authService.clearSession();
+      setUser(null);
+      setPermissions([]);
+
       if (!(requestError instanceof ApiError)) {
         throw requestError;
       }
@@ -94,12 +107,14 @@ export default function useAuthViewModel() {
       );
     } finally {
       setUser(null);
+      setPermissions([]);
       setIsLoggingOut(false);
     }
   };
 
   return {
     user,
+    permissions,
     isInitializing,
     isSubmitting,
     isLoggingOut,

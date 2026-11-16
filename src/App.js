@@ -10,6 +10,7 @@ function App() {
     <ProtectedRoute auth={auth}>
       <AuthenticatedView
         user={auth.user}
+        permissions={auth.permissions}
         error={auth.error}
         isLoggingOut={auth.isLoggingOut}
         onLogout={auth.logout}
