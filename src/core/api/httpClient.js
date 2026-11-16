@@ -14,7 +14,12 @@ function validationMessage(errors) {
   return firstError || null;
 }
 
-export async function apiRequest(path, { method = 'GET', body, token } = {}) {
+export async function apiRequest(path, {
+  method = 'GET',
+  body,
+  token,
+  idempotencyKey,
+} = {}) {
   const headers = {
     Accept: 'application/json',
   };
@@ -26,6 +31,9 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
   const authToken = token || getAuthToken();
   if (authToken) {
     headers.Authorization = `Bearer ${authToken}`;
+  }
+  if (idempotencyKey) {
+    headers['Idempotency-Key'] = idempotencyKey;
   }
 
   let response;

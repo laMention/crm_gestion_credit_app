@@ -12,9 +12,9 @@ function getClientFromResponse(response) {
   return normalizeManagedClient(response.data);
 }
 
-export async function listClients({ search, status, page }) {
+export async function listClients({ search, status, page, perPage = PAGE_SIZE }) {
   const query = new URLSearchParams({
-    per_page: String(PAGE_SIZE),
+    per_page: String(perPage),
     page: String(page),
   });
 
