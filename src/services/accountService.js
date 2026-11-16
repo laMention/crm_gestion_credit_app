@@ -5,9 +5,15 @@ import { normalizeAccountStatement, normalizeManagedAccount } from '../models/ma
 const DEFAULT_PAGE_SIZE = 10;
 const STATEMENT_PAGE_SIZE = 20;
 
-export async function listAccounts({ number = '', type = '', status = '', page = 1 } = {}) {
+export async function listAccounts({
+  number = '',
+  type = '',
+  status = '',
+  page = 1,
+  perPage = DEFAULT_PAGE_SIZE,
+} = {}) {
   const query = new URLSearchParams({
-    per_page: String(DEFAULT_PAGE_SIZE),
+    per_page: String(perPage),
     page: String(page),
   });
 

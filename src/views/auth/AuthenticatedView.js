@@ -4,6 +4,7 @@ import DashboardView from '../dashboard/DashboardView';
 import ClientsView from '../clients/ClientsView';
 import AgenciesView from '../agencies/AgenciesView';
 import AccountsView from '../accounts/AccountsView';
+import TransactionsView from '../transactions/TransactionsView';
 
 function BrandMark() {
   return (
@@ -42,9 +43,11 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
         ? 'clients'
         : canViewAccounts
           ? 'accounts'
-        : canViewAgencies
-          ? 'agencies'
-          : 'home',
+          : canViewTransactions
+            ? 'transactions'
+            : canViewAgencies
+              ? 'agencies'
+              : 'home',
   );
 
   return (
@@ -57,7 +60,7 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             <small>Crédit &amp; opérations</small>
           </span>
         </div>
-        {(canViewDashboard || canViewClients || canViewAccounts) && (
+        {(canViewDashboard || canViewClients || canViewAccounts || canViewTransactions) && (
           <>
             <p className="crm-sidebar-section">ACTIVITÉ</p>
             {canViewDashboard && (
@@ -91,6 +94,17 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
               >
                 <span aria-hidden="true" className="crm-sidebar-link-icon">▤</span>
                 Comptes
+              </button>
+            )}
+            {canViewTransactions && (
+              <button
+                aria-current={activePage === 'transactions' ? 'page' : undefined}
+                className={`crm-sidebar-link${activePage === 'transactions' ? ' is-active' : ''}`}
+                onClick={() => setActivePage('transactions')}
+                type="button"
+              >
+                <span aria-hidden="true" className="crm-sidebar-link-icon">⇄</span>
+                Transactions
               </button>
             )}
           </>
@@ -137,6 +151,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
               ? 'Administration · Agences'
             : activePage === 'dashboard'
               ? 'Activité · Tableau de bord'
+              : activePage === 'transactions'
+                ? 'Activité · Transactions'
               : activePage === 'accounts'
                 ? 'Activité · Comptes'
               : activePage === 'clients'
@@ -166,6 +182,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
           <ClientsView user={user} permissions={permissions} />
         ) : activePage === 'accounts' && canViewAccounts ? (
           <AccountsView permissions={permissions} />
+        ) : activePage === 'transactions' && canViewTransactions ? (
+          <TransactionsView permissions={permissions} user={user} />
         ) : activePage === 'users' && canViewUsers ? (
           <UsersView permissions={permissions} user={user} />
         ) : activePage === 'agencies' && canViewAgencies ? (
@@ -219,6 +237,15 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 type="button"
               >
                 Ouvrir la gestion des comptes
+              </button>
+            )}
+            {canViewTransactions && (
+              <button
+                className="users-button users-button-primary"
+                onClick={() => setActivePage('transactions')}
+                type="button"
+              >
+                Ouvrir les transactions
               </button>
             )}
             {canViewAgencies && (
