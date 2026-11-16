@@ -7,6 +7,7 @@ import AccountsView from '../accounts/AccountsView';
 import TransactionsView from '../transactions/TransactionsView';
 import CreditsView from '../credits/CreditsView';
 import InstallmentsView from '../installments/InstallmentsView';
+import ReportingView from '../reporting/ReportingView';
 
 function BrandMark() {
   return (
@@ -22,6 +23,10 @@ function BrandMark() {
 function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout }) {
   const canViewDashboard = permissions.some(
     (permission) => permission.id === 'reportings.consulter_tout',
+  );
+  const canViewReporting = canViewDashboard;
+  const canExportReporting = permissions.some(
+    (permission) => permission.id === 'reportings.exporter_tout',
   );
   const canViewTransactions = permissions.some(
     (permission) => permission.id === 'transactions.consulter_tout',
@@ -72,7 +77,7 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             <small>Crédit &amp; opérations</small>
           </span>
         </div>
-        {(canViewDashboard || canViewClients || canViewAccounts || canViewTransactions || canViewCredits || canViewInstallments) && (
+        {(canViewDashboard || canViewReporting || canViewClients || canViewAccounts || canViewTransactions || canViewCredits || canViewInstallments) && (
           <>
             <p className="crm-sidebar-section">ACTIVITÉ</p>
             {canViewDashboard && (
@@ -84,6 +89,17 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
               >
                 <span aria-hidden="true" className="crm-sidebar-link-icon">▦</span>
                 Tableau de bord
+              </button>
+            )}
+            {canViewReporting && (
+              <button
+                aria-current={activePage === 'reporting' ? 'page' : undefined}
+                className={`crm-sidebar-link${activePage === 'reporting' ? ' is-active' : ''}`}
+                onClick={() => setActivePage('reporting')}
+                type="button"
+              >
+                <span aria-hidden="true" className="crm-sidebar-link-icon">▤</span>
+                Reporting et exports
               </button>
             )}
             {canViewClients && (
@@ -185,6 +201,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
               ? 'Administration · Agences'
             : activePage === 'dashboard'
               ? 'Activité · Tableau de bord'
+              : activePage === 'reporting'
+                ? 'Pilotage · Reporting et exports'
               : activePage === 'transactions'
                 ? 'Activité · Transactions'
               : activePage === 'accounts'
@@ -216,6 +234,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
       <main className="crm-main">
         {activePage === 'dashboard' && canViewDashboard ? (
           <DashboardView canViewTransactions={canViewTransactions} />
+        ) : activePage === 'reporting' && canViewReporting ? (
+          <ReportingView canExport={canExportReporting} user={user} />
         ) : activePage === 'clients' && canViewClients ? (
           <ClientsView user={user} permissions={permissions} />
         ) : activePage === 'accounts' && canViewAccounts ? (
