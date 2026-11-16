@@ -2,6 +2,20 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Configuration de l’API Laravel
+
+L’application utilise par défaut `http://localhost:8000/api/v1`, conformément à
+l’URL de développement du backend. Pour une autre adresse, définissez
+`REACT_APP_API_URL` dans un fichier `.env.local` à la racine du frontend, puis
+redémarrez le serveur React :
+
+```env
+REACT_APP_API_URL=http://localhost:8000/api/v1
+```
+
+Le formulaire d’authentification utilise les routes Laravel
+`POST /auth/login`, `GET /auth/profile` et `POST /auth/logout`.
+
 ## Available Scripts
 
 In the project directory, you can run:
