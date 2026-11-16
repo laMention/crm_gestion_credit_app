@@ -157,6 +157,41 @@ export function normalizeCreditInstallment(value) {
     throw new ApiError('Le serveur a renvoyé une échéance de crédit invalide.', 200);
   }
 
+  const credit = value.credit;
+  if (
+    credit !== null
+    && credit !== undefined
+    && (
+      !isRecord(credit)
+      || typeof credit.uuid !== 'string'
+      || typeof credit.statut !== 'string'
+      || (credit.compte !== null
+        && credit.compte !== undefined
+        && (
+          !isRecord(credit.compte)
+          || typeof credit.compte.uuid !== 'string'
+          || typeof credit.compte.numero_compte !== 'string'
+        ))
+    )
+  ) {
+    throw new ApiError('Le crédit associé à l’échéance renvoyé par le serveur est invalide.', 200);
+  }
+
+  const client = credit?.compte?.client;
+  if (
+    client !== null
+    && client !== undefined
+    && (
+      !isRecord(client)
+      || typeof client.uuid !== 'string'
+      || typeof client.code_client !== 'string'
+      || typeof client.nom_client !== 'string'
+      || typeof client.prenom_client !== 'string'
+    )
+  ) {
+    throw new ApiError('Le client associé à l’échéance renvoyé par le serveur est invalide.', 200);
+  }
+
   return {
     uuid: value.uuid,
     number: Number(value.numero_echeance),
@@ -168,5 +203,25 @@ export function normalizeCreditInstallment(value) {
     remaining: String(value.reste_a_payer),
     paidAt: optionalString(value.date_paiement, 'date_paiement'),
     status: value.statut_echeance_credit,
+    credit: credit
+      ? {
+        uuid: credit.uuid,
+        status: credit.statut,
+        account: credit.compte
+          ? {
+            uuid: credit.compte.uuid,
+            number: credit.compte.numero_compte,
+            client: client
+              ? {
+                uuid: client.uuid,
+                code: client.code_client,
+                firstName: client.prenom_client,
+                lastName: client.nom_client,
+              }
+              : null,
+          }
+          : null,
+      }
+      : null,
   };
 }

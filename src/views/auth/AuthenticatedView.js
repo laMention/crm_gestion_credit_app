@@ -6,6 +6,7 @@ import AgenciesView from '../agencies/AgenciesView';
 import AccountsView from '../accounts/AccountsView';
 import TransactionsView from '../transactions/TransactionsView';
 import CreditsView from '../credits/CreditsView';
+import InstallmentsView from '../installments/InstallmentsView';
 
 function BrandMark() {
   return (
@@ -40,6 +41,9 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
   const canViewCredits = permissions.some(
     (permission) => permission.id === 'credits.consulter_tout',
   );
+  const canViewInstallments = permissions.some(
+    (permission) => permission.id === 'echeances.consulter_tout',
+  );
   const [activePage, setActivePage] = useState(
     canViewDashboard
       ? 'dashboard'
@@ -51,9 +55,11 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             ? 'transactions'
             : canViewCredits
               ? 'credits'
-            : canViewAgencies
-              ? 'agencies'
-              : 'home',
+              : canViewInstallments
+                ? 'installments'
+                : canViewAgencies
+                  ? 'agencies'
+                  : 'home',
   );
 
   return (
@@ -66,7 +72,7 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
             <small>Crédit &amp; opérations</small>
           </span>
         </div>
-        {(canViewDashboard || canViewClients || canViewAccounts || canViewTransactions || canViewCredits) && (
+        {(canViewDashboard || canViewClients || canViewAccounts || canViewTransactions || canViewCredits || canViewInstallments) && (
           <>
             <p className="crm-sidebar-section">ACTIVITÉ</p>
             {canViewDashboard && (
@@ -124,6 +130,17 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 Crédits
               </button>
             )}
+            {canViewInstallments && (
+              <button
+                aria-current={activePage === 'installments' ? 'page' : undefined}
+                className={`crm-sidebar-link${activePage === 'installments' ? ' is-active' : ''}`}
+                onClick={() => setActivePage('installments')}
+                type="button"
+              >
+                <span aria-hidden="true" className="crm-sidebar-link-icon">▦</span>
+                Échéances
+              </button>
+            )}
           </>
         )}
         {(canViewUsers || canViewAgencies) && (
@@ -174,6 +191,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 ? 'Activité · Comptes'
               : activePage === 'credits'
                 ? 'Activité · Crédits'
+              : activePage === 'installments'
+                ? 'Activité · Échéances'
               : activePage === 'clients'
                 ? 'Activité · Clients'
               : 'Espace collaborateur'}
@@ -205,6 +224,8 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
           <TransactionsView permissions={permissions} user={user} />
         ) : activePage === 'credits' && canViewCredits ? (
           <CreditsView permissions={permissions} user={user} />
+        ) : activePage === 'installments' && canViewInstallments ? (
+          <InstallmentsView />
         ) : activePage === 'users' && canViewUsers ? (
           <UsersView permissions={permissions} user={user} />
         ) : activePage === 'agencies' && canViewAgencies ? (
@@ -276,6 +297,15 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 type="button"
               >
                 Ouvrir la gestion des crédits
+              </button>
+            )}
+            {canViewInstallments && (
+              <button
+                className="users-button users-button-primary"
+                onClick={() => setActivePage('installments')}
+                type="button"
+              >
+                Ouvrir les échéances
               </button>
             )}
             {canViewAgencies && (
