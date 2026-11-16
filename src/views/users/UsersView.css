@@ -156,6 +156,29 @@
   font-size: 13px;
 }
 
+.crm-topbar-agency {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  margin-left: auto;
+  padding: 0 16px;
+}
+
+.crm-topbar-agency strong {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-topbar-agency small {
+  color: var(--color-muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
 .crm-topbar-account {
   display: flex;
   align-items: center;
@@ -977,6 +1000,18 @@
     font-size: 11px;
   }
 
+  .crm-topbar-agency {
+    padding: 0 8px;
+  }
+
+  .crm-topbar-agency strong {
+    max-width: 130px;
+  }
+
+  .crm-topbar-agency small {
+    font-size: 9px;
+  }
+
   .crm-topbar-account {
     gap: 8px;
   }
@@ -1061,6 +1096,19 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .crm-topbar-agency {
+    padding: 0 5px;
+  }
+
+  .crm-topbar-agency strong {
+    max-width: 92px;
+    font-size: 10px;
+  }
+
+  .crm-topbar-agency small {
+    font-size: 8px;
   }
 
   .crm-topbar-identity strong {

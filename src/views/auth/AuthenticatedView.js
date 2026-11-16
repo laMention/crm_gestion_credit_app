@@ -22,6 +22,7 @@ function BrandMark() {
 }
 
 function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout }) {
+  const roleAgence = ['chef_agence', 'conseiller', 'caissier'].includes(user.role);
   const canViewDashboard = permissions.some(
     (permission) => permission.id === 'reportings.consulter_tout',
   );
@@ -235,6 +236,12 @@ function AuthenticatedView({ user, permissions, error, isLoggingOut, onLogout })
                 ? 'Sécurité · Journal d’audit'
               : 'Espace collaborateur'}
         </span>
+        {roleAgence && user.agence && (
+          <div aria-label="Agence de rattachement" className="crm-topbar-agency">
+            <strong>{user.agence.nom}</strong>
+            <small>Code agence : {user.agence.code}</small>
+          </div>
+        )}
         <div className="crm-topbar-account">
           <span className="crm-topbar-identity">
             <strong>{`${user.prenom} ${user.nom}`}</strong>
