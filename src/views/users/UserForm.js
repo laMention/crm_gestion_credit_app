@@ -28,11 +28,14 @@ function UserForm({
   const selectedRole = roles.find((role) => role.identifiant === values.role);
   const roleRequiresAgency = AGENCY_ROLES.has(values.role);
   const roleChanged = Boolean(user && values.role !== user.role);
-  const agencyIdRequired = roleRequiresAgency && (!user || roleChanged);
-  const availableAgencies = user?.agence
-    && !agencies.some((agency) => agency.id === user.agence.id)
-    ? [{ ...user.agence, name: user.agence.nom, active: user.agence.active }, ...agencies]
-    : agencies;
+  const agencyIdRequired = roleRequiresAgency;
+  const activeAgencies = agencies.filter((agency) => agency.active);
+  const availableAgencies = [
+    ...activeAgencies,
+    ...(user?.agence && !activeAgencies.some((agency) => agency.id === user.agence.id)
+      ? [user.agence]
+      : []),
+  ];
 
   const updateValue = (event) => {
     const { name, value } = event.target;
@@ -78,10 +81,18 @@ function UserForm({
       payload.role = values.role;
     }
 
+    const agencyChanged = values.agenceId !== (user?.agence ? String(user.agence.id) : '');
+
     if (values.agenceId) {
       payload.agence_id = Number(values.agenceId);
-    } else if (roleChanged && !roleRequiresAgency) {
+    } else if ((!user || roleChanged || agencyChanged) && !roleRequiresAgency) {
       payload.agence_id = null;
+    }
+
+    if (user && agencyChanged && !window.confirm(
+      'Confirmer le changement d’agence ? Seul le rattachement de cet utilisateur sera modifié ; les opérations historiques conserveront leur agence d’origine.',
+    )) {
+      return;
     }
 
     if (!user || values.password) {
@@ -162,7 +173,7 @@ function UserForm({
                 ))}
               </select>
             </label>
-            {roleRequiresAgency && (
+            <>
               <label className="users-form-wide">
                 <span>
                   Agence de rattachement{agencyIdRequired ? ' (obligatoire)' : ' (facultative)'}
@@ -185,7 +196,12 @@ function UserForm({
                   ))}
                 </select>
               </label>
-            )}
+              <p className="users-form-hint users-form-wide">
+                {roleRequiresAgency
+                  ? 'Une agence active est obligatoire pour ce rôle. Un rattachement existant à une agence désactivée peut être conservé ou remplacé par une agence active.'
+                  : 'Le rattachement est facultatif pour les rôles réseau. Sans agence, le compte conserve son accès réseau.'}
+              </p>
+            </>
             <label className="users-form-wide">
               <span>{user ? 'Nouveau mot de passe (facultatif)' : 'Mot de passe'}</span>
               <input
@@ -213,13 +229,6 @@ function UserForm({
               </label>
             )}
           </div>
-
-          {roleRequiresAgency && (
-            <p className="users-form-hint">
-              Seules les agences actives sont proposées pour une nouvelle affectation.
-              Les utilisateurs déjà rattachés conservent leur accès si une agence est désactivée.
-            </p>
-          )}
 
           {selectedRole && (
             <div className="users-role-preview">

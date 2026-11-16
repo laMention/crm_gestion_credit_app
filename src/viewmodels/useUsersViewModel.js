@@ -6,6 +6,7 @@ import * as userService from '../services/userService';
 const INITIAL_FILTERS = {
   search: '',
   role: '',
+  agencyId: '',
   status: '',
 };
 
@@ -73,7 +74,6 @@ export default function useUsersViewModel() {
 
     try {
       const result = await agencyService.listAgencies({
-        status: '1',
         page: 1,
         perPage: 100,
       });
@@ -109,7 +109,7 @@ export default function useUsersViewModel() {
   }, [loadAgencies]);
 
   const applyFilters = (nextFilters) => {
-    setFilters(nextFilters);
+    setFilters({ ...INITIAL_FILTERS, ...nextFilters });
     setPage(1);
     setNotice('');
     setActionError('');

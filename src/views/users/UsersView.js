@@ -130,6 +130,7 @@ function UsersView({ user, permissions }) {
   const viewModel = useUsersViewModel();
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('');
+  const [agencyId, setAgencyId] = useState('');
   const [status, setStatus] = useState('');
   const [formUser, setFormUser] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -147,7 +148,7 @@ function UsersView({ user, permissions }) {
 
   const submitFilters = (event) => {
     event.preventDefault();
-    viewModel.applyFilters({ search: search.trim(), role, status });
+    viewModel.applyFilters({ search: search.trim(), role, agencyId, status });
   };
 
   const confirmStatusChange = async () => {
@@ -219,7 +220,7 @@ function UsersView({ user, permissions }) {
             <span className="users-visually-hidden">Rechercher un utilisateur</span>
             <input
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Nom, e-mail ou téléphone…"
+              placeholder="Nom, prénom, e-mail ou téléphone…"
               type="search"
               value={search}
             />
@@ -230,6 +231,17 @@ function UsersView({ user, permissions }) {
               <option value="">Tous les rôles</option>
               {viewModel.roles.map((item) => (
                 <option key={item.identifiant} value={item.identifiant}>{item.libelle}</option>
+              ))}
+            </select>
+          </label>
+          <label className="users-filter-select">
+            <span className="users-visually-hidden">Filtrer par agence</span>
+            <select onChange={(event) => setAgencyId(event.target.value)} value={agencyId}>
+              <option value="">Toutes les agences</option>
+              {viewModel.agencies.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} · {item.code}{item.active ? '' : ' (inactive)'}
+                </option>
               ))}
             </select>
           </label>
@@ -283,7 +295,7 @@ function UsersView({ user, permissions }) {
                     <td>{item.telephone || '—'}</td>
                     <td>
                       {item.agence
-                        ? <span>{item.agence.nom}<small>{item.agence.ville || item.agence.code}</small></span>
+                        ? <span>{item.agence.nom}<small>{item.agence.code} · {item.agence.ville || 'Ville non renseignée'}{item.agence.active ? '' : ' · inactive'}</small></span>
                         : 'Réseau'}
                     </td>
                     <td><span className="users-role-badge">{formatRole(item.role, viewModel.roles)}</span></td>

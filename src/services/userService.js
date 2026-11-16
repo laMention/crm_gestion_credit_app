@@ -12,7 +12,7 @@ function getUserFromResponse(response) {
   return normalizeManagedUser(response.data);
 }
 
-export async function listUsers({ search, role, status, page }) {
+export async function listUsers({ search, role, agencyId, status, page }) {
   const query = new URLSearchParams({
     per_page: String(PAGE_SIZE),
     page: String(page),
@@ -24,6 +24,10 @@ export async function listUsers({ search, role, status, page }) {
 
   if (role) {
     query.set('role', role);
+  }
+
+  if (agencyId) {
+    query.set('agence_id', agencyId);
   }
 
   if (status !== '') {
