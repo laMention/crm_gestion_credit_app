@@ -192,6 +192,134 @@
   box-shadow: 0 2px 5px rgb(23 29 45 / 3%);
 }
 
+.client-accounts-section {
+  margin-top: 22px;
+}
+
+.client-accounts-heading,
+.client-account-heading,
+.client-statement-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.client-accounts-heading h2,
+.client-account-heading h3,
+.client-statement-heading h4 {
+  margin: 3px 0 0;
+  color: #20283a;
+}
+
+.client-accounts-heading > span,
+.client-statement-page-count {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.client-accounts-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.client-account-card,
+.client-no-accounts {
+  padding: 20px;
+  border: 1px solid #e1e5eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgb(23 29 45 / 3%);
+}
+
+.client-account-heading h3 {
+  font-size: 16px;
+}
+
+.client-account-fields,
+.client-statement-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.client-account-fields dt {
+  margin-bottom: 4px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.client-account-fields dd {
+  margin: 0;
+  color: #20283a;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.client-statement-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #edf0f3;
+}
+
+.client-statement-filters label {
+  display: grid;
+  gap: 5px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.client-statement-filters input {
+  min-height: 36px;
+  padding: 6px 9px;
+  border: 1px solid #d5dbe5;
+  border-radius: 7px;
+  color: #20283a;
+}
+
+.client-statement-print {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #edf0f3;
+}
+
+.client-statement-heading p:last-child {
+  margin: 6px 0 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.client-statement-totals > span {
+  display: grid;
+  gap: 5px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.client-statement-totals strong {
+  color: #20283a;
+  font-size: 13px;
+}
+
+.client-statement-page-count {
+  margin: 10px 0 0;
+  text-align: right;
+}
+
+@media print {
+  body * { visibility: hidden !important; }
+  .client-statement-print,
+  .client-statement-print * { visibility: visible !important; }
+  .client-statement-print { position: absolute; inset: 0; width: 100%; margin: 0; padding: 0; border: 0; }
+  .client-statement-print button { display: none; }
+  .client-statement-print table { width: 100%; }
+}
+
 .clients-profile-identity {
   display: flex;
   align-items: center;

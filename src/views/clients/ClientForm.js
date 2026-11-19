@@ -14,6 +14,7 @@ function ClientForm({ client, isSaving, error, onClose, onSubmit }) {
     profession: client?.profession || '',
     monthlyIncome: client?.monthlyIncome || '',
   });
+  const [accountTypes, setAccountTypes] = useState([]);
 
   const updateValue = (event) => {
     const { name, value } = event.target;
@@ -38,6 +39,7 @@ function ClientForm({ client, isSaving, error, onClose, onSubmit }) {
       sexe: values.gender.trim() || null,
       profession: values.profession.trim() || null,
       revenu_mensuel: values.monthlyIncome === '' ? null : Number(values.monthlyIncome),
+      ...(!client ? { types_comptes: accountTypes } : {}),
     };
 
     const saved = await onSubmit({ uuid: client?.uuid, payload });
@@ -196,6 +198,30 @@ function ClientForm({ client, isSaving, error, onClose, onSubmit }) {
               />
             </label>
           </div>
+
+          {!client && (
+            <fieldset className="clients-account-options">
+              <legend>Comptes à créer avec le client</legend>
+              {[
+                ['courant', 'Compte courant'],
+                ['epargne', 'Compte épargne'],
+                ['credit', 'Compte de crédit'],
+              ].map(([type, label]) => (
+                <label key={type}>
+                  <input
+                    checked={accountTypes.includes(type)}
+                    onChange={(event) => setAccountTypes((current) => (
+                      event.target.checked
+                        ? [...current, type]
+                        : current.filter((item) => item !== type)
+                    ))}
+                    type="checkbox"
+                  />
+                  {label}
+                </label>
+              ))}
+            </fieldset>
+          )}
 
           <p className="clients-form-hint">
             Le code client, l’agence et le statut sont définis par le système.

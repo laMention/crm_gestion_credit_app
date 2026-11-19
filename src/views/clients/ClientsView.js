@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import useClientsViewModel from '../../viewmodels/useClientsViewModel';
 import ClientForm from './ClientForm';
+import ApiError from '../../core/api/ApiError';
+import * as accountService from '../../services/accountService';
 import './ClientsView.css';
 
 const CLIENT_STATUS_LABELS = {
@@ -31,6 +33,72 @@ function formatDate(value) {
   }
 
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(date);
+}
+
+const ACCOUNT_TYPE_LABELS = { courant: 'Courant', epargne: 'Épargne', credit: 'Crédit' };
+
+function money(amount, currency = 'XOF') {
+  return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(Number(amount) || 0) + ' ' + currency;
+}
+
+function ClientAccount({ account, clientName }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const [start, setStart] = useState(today.slice(0, 7) + '-01');
+  const [end, setEnd] = useState(today);
+  const [statement, setStatement] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const generateStatement = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const firstPage = await accountService.getAccountStatement(account.uuid, { start, end });
+      const operations = [...firstPage.operations];
+      for (let page = 2; page <= firstPage.meta.lastPage; page += 1) {
+        const nextPage = await accountService.getAccountStatement(account.uuid, { start, end, page });
+        operations.push(...nextPage.operations);
+      }
+      setStatement({ ...firstPage, operations });
+    } catch (requestError) {
+      if (!(requestError instanceof ApiError)) throw requestError;
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <article className="client-account-card">
+      <div className="client-account-heading">
+        <div><p className="users-eyebrow">{ACCOUNT_TYPE_LABELS[account.type] || account.type}</p><h3>{account.number}</h3></div>
+        <span className={`clients-status clients-status-${account.status === 'actif' ? 'actif' : 'inactif'}`}>{account.status}</span>
+      </div>
+      <dl className="client-account-fields">
+        <div><dt>Solde</dt><dd>{money(account.balance, account.currency)}</dd></div>
+        <div><dt>Ouvert le</dt><dd>{formatDate(account.openedAt)}</dd></div>
+        <div><dt>Agence</dt><dd>{account.agency?.name || '—'}</dd></div>
+      </dl>
+      <form className="client-statement-filters" onSubmit={generateStatement}>
+        <label>Du<input required onChange={(event) => setStart(event.target.value)} type="date" value={start} /></label>
+        <label>Au<input required onChange={(event) => setEnd(event.target.value)} type="date" value={end} /></label>
+        <button className="users-button users-button-secondary" disabled={loading} type="submit">{loading ? 'Génération…' : 'Générer le relevé'}</button>
+      </form>
+      {error && <p className="users-inline-error" role="alert">{error}</p>}
+      {statement && (
+        <section className="client-statement-print" aria-label={'Relevé du compte ' + account.number}>
+          <header className="client-statement-heading"><div><p className="users-eyebrow">Relevé de compte</p><h4>{account.number} · {ACCOUNT_TYPE_LABELS[account.type] || account.type}</h4><p>{clientName} · Du {formatDate(statement.period.start)} au {formatDate(statement.period.end)}</p></div><button className="users-button users-button-primary" onClick={() => window.print()} type="button">Imprimer / enregistrer en PDF</button></header>
+          <div className="client-statement-totals"><span>Solde initial <strong>{money(statement.period.openingBalance, account.currency)}</strong></span><span>Crédits <strong>{money(statement.totals.credits, account.currency)}</strong></span><span>Débits <strong>{money(statement.totals.debits, account.currency)}</strong></span><span>Solde final <strong>{money(statement.totals.closingBalance, account.currency)}</strong></span></div>
+          <div className="users-table-scroll"><table className="users-table"><thead><tr><th>Date</th><th>Opération</th><th>Référence</th><th>Débit</th><th>Crédit</th><th>Solde</th></tr></thead><tbody>
+            {statement.operations.map((operation) => <tr key={operation.reference + operation.date}><td>{formatDate(operation.date)}</td><td>{operation.label}</td><td>{operation.reference}</td><td>{operation.direction === 'debit' ? money(operation.amount, account.currency) : '—'}</td><td>{operation.direction === 'credit' ? money(operation.amount, account.currency) : '—'}</td><td>{money(operation.balanceAfter, account.currency)}</td></tr>)}
+            {!statement.operations.length && <tr><td className="users-empty" colSpan="6">Aucun mouvement sur cette période.</td></tr>}
+          </tbody></table></div>
+          <p className="client-statement-page-count">{statement.meta.total} opération(s)</p>
+        </section>
+      )}
+    </article>
+  );
 }
 
 function ClientDetail({ client, canEdit, onBack, onEdit }) {
@@ -87,6 +155,10 @@ function ClientDetail({ client, canEdit, onBack, onEdit }) {
           <div><dt>Comptes associés</dt><dd>{countFormatter.format(client.accountCount)}</dd></div>
         </dl>
       </article>
+      <section aria-labelledby="client-accounts-title" className="client-accounts-section">
+        <header className="client-accounts-heading"><div><p className="users-eyebrow">Comptes rattachés</p><h2 id="client-accounts-title">Comptes du client</h2></div><span>{countFormatter.format(client.accounts.length)} compte(s)</span></header>
+        {client.accounts.length ? <div className="client-accounts-list">{client.accounts.map((account) => <ClientAccount account={account} clientName={client.firstName + ' ' + client.lastName} key={account.uuid} />)}</div> : <p className="users-card client-no-accounts">Aucun compte n’est rattaché à ce client.</p>}
+      </section>
     </section>
   );
 }

@@ -134,13 +134,14 @@ function AccountForm({ error, isSaving, onClose, onSubmit }) {
             Type de compte
             <select disabled={isSaving} onChange={(event) => setType(event.target.value)} value={type}>
               <option value="courant">Compte courant</option>
+              <option value="credit">Compte de crédit</option>
               <option value="epargne">Compte épargne</option>
             </select>
           </label>
 
           <p className="account-form-note">
             Le numéro, l’agence, le solde et la date d’ouverture sont déterminés par le serveur.
-            Les comptes de crédit sont créés depuis une demande de crédit approuvée.
+            Les comptes de crédit peuvent aussi être ouverts ici, puis utilisés dans une demande.
           </p>
           {(clientError || error) && (
             <p className="users-inline-error" role="alert">{clientError || error}</p>

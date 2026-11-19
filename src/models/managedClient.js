@@ -1,4 +1,5 @@
 import ApiError from '../core/api/ApiError';
+import { normalizeManagedAccount } from './managedAccount';
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -66,6 +67,7 @@ export function normalizeManagedClient(value) {
       : String(value.revenu_mensuel),
     status: value.statut,
     accountCount: value.comptes_count,
+    accounts: Array.isArray(value.comptes) ? value.comptes.map(normalizeManagedAccount) : [],
     createdAt: optionalString(value.cree_le, 'cree_le'),
     updatedAt: optionalString(value.modifie_le, 'modifie_le'),
     agency: value.agence
